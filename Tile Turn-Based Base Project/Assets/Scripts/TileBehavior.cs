@@ -37,11 +37,13 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     float stepDuration = 0.1f;
     #endregion
 
+    #region initialization
     void Awake() {
         tileHighlighter.transform.position = transform.position;
         tileHighlighterAnimator = tileHighlighter.GetComponent<Animator>();
         setHighlightOpacity(playerOpacity);
     }
+    #endregion
 
     private void setHighlightOpacity(float opacity) {
         Color c = tileHighlighter.GetComponent<Renderer>().material.color;
@@ -54,10 +56,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         unit.GetComponent<Character>().SetAnimVar();
         myUnit = unit;
         myUnit.transform.position = transform.position - new Vector3(0, 0, 0);
-        
-        //Might need later
-        //myUnit.transform.position = transform.position - new Vector3(0, 0.5f - (1f / 24f), 0);
-
         myUnit.GetComponent<Character>().RecalculateDepth();
         myUnit.GetComponent<Character>().SetOccupiedTile(gameObject);
     }
@@ -190,7 +188,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         }
 
         //Otherwise, hightlight yourself...
-        //Debug.Log($"Tile at ({xPosition}, {yPosition}) has unit {myUnit}");
         if (myUnit == null) {
             HighlightCanMove(enemySelect);
         }
@@ -265,7 +262,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
 
     #region selection_functions
     public void OnPointerClick(PointerEventData data) {
-        Debug.Log("pressed");
         //Condition where pointer click fails
         if (GameManager.actionInProcess) {
             return;
@@ -278,12 +274,10 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                 // and the unit's player is equal to to the current player...
                 if (GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                     // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                    print("you selected a unit");
                     SelectionStateToMove();
                 }
                 // ad the unit's player is equal to the enemy player...
                 else {
-                    print("you selected an enemy unit");
                     SelectionStateToEnemySelect();
                 }
             }
@@ -291,7 +285,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
             // and this tile does not have a unit on it...
             else {
                 // do nothing.
-                print("you pressed an empty tile");
             }
         }
         // If something is currently selected...
@@ -301,49 +294,40 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                 // and the selected character can move onto this tile...
                 if (highlighted && myUnit == null) {
                     // move that character onto this tile and dehighlight everything.
-                    print("you moved the selected unit");
-
                     selectedTile.GetComponent<TileBehavior>().ClearUnit();
                     StartCoroutine(MoveUnitToThisTile(selectedUnit, selectedTile));
                 }
 
                 // and you are the selectedTile...
                 else if (selectedTile.Equals(gameObject)) {
-                    print("you deselected a unit");
                     Deselect();
-                    //NEEDS EDIT
                     GameManager.GetSingleton().ClearUI();
                 }
 
                 // and the unit's player is equal to to the current player...
                 else if (myUnit != null && GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                     // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                    print("you selected a unit");
-
                     SelectionStateToMove();
                 }
                 // and the unit's player is equal to the enemy player...
                 else if (myUnit != null && !GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                     // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                    print("you selected an enemy unit");
                     SelectionStateToEnemySelect();
                 }
                 // and the selected character cannot move onto this tile...
                 else {
                     // Dehighlight everything.
-                    print("can't move there, bitch");
                     SelectionStateToNull();
                 }
             }
             // and selection state is attack...
             else if (selectionState.Equals("attack")) {
-                print("selection state: " + selectionState);
                 // and the selected character can attack there...
                 if (highlighted && myUnit != null && myUnit.GetComponent<Character>().GetPlayer() != selectedUnit.GetComponent<Character>().GetPlayer()) {
                     // (Attack), and deselect everything.
-                    print("attack!");
+
                     //ADD CODE FOR ATTACK
-                    print("RESET");
+
                     SelectionStateToNull();
 
                 }
@@ -351,21 +335,18 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                 // and the unit's player is equal to to the current player...
                 else if (myUnit != null && GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                     // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                    print("you selected a unit");
                     SelectionStateToMove();
                 }
 
                 // and the unit's player is equal to the enemy player...
                 else if (myUnit != null && !GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                     // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                    print("you selected an enemy unit");
                     SelectionStateToEnemySelect();
                 }
 
                 // and the selected character cannot attack there...
                 else {
                     // Dehighlight everything.
-                    print("can't attack there");
                     SelectionStateToNull();
                 }
             }
@@ -376,13 +357,11 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                     // and the unit's player is equal to to the current player...
                     if (GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                         // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                        print("you selected a unit");
                         SelectionStateToMove();
                     }
 
                     // and you are the selectedTile...
                     else if (selectedTile.Equals(gameObject)) {
-                        print("you deselected a unit");
                         Deselect();
                         //NEEDS EDIT
                         GameManager.GetSingleton().ClearUI();
@@ -391,7 +370,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                     // and the unit's player is equal to the enemy player...
                     else if (myUnit != null && !GameManager.currentPlayer.Equals(myUnit.GetComponent<Character>().GetPlayer())) {
                         // select that unit/tile and highlight the tiles that the unit can move to (if it can move).
-                        print("you selected an enemy unit");
                         SelectionStateToEnemySelect();
                     }
                 }
@@ -399,7 +377,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
                 // and this tile does not have a unit on it...
                 else {
                     // Dehighlight everything.
-                    print("unselect everything");
                     SelectionStateToNull();
                 }
             }
@@ -409,7 +386,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
 
     #region selection_state_to_functions
     public void SelectionStateToNull() {
-        // Deselect
+        // Deselect everything else
         Deselect();
     }
 
@@ -426,11 +403,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         HighlightSelected();
 
         // Open the Character UI
-        //NEEDS EDIT
         GameManager.GetSingleton().ShowCharacterUI(selectedUnit);
-        //if (moneyTileMarker != null) {
-        //LevelManager.singleton.GetComponent<LevelManager>().ShowMoneyButton();
-        //}
 
         // Highlight moveable tiles
         if (selectedUnit.GetComponent<Character>().GetCanMove()) {
@@ -439,6 +412,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
 
     public void SelectionStateToAttack() {
+        // Deselect everything else
         Deselect();
 
         // Switch selection state to move
@@ -450,11 +424,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         HighlightSelected();
 
         // Open the Character UI
-        //NEEDS EDIT
         GameManager.GetSingleton().ShowCharacterUI(selectedUnit);
-        //if (moneyTileMarker != null) {
-        //    LevelManager.singleton.GetComponent<LevelManager>().ShowMoneyButton();
-        //}
 
         //Highlight attackable tiles
         selectedTile.transform.GetComponent<TileBehavior>().HighlightAttackableTiles(selectedUnit);
@@ -482,6 +452,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
 
     public void SelectionStateToEnemySelectAttack() {
+        // Deselect everything else
         Deselect();
 
         // Switch selection state to move
@@ -499,6 +470,8 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         selectedTile.transform.GetComponent<TileBehavior>().HighlightAttackableTiles(selectedUnit, true);
     }
     #endregion
+
+    #region deselect
     public static void Deselect() {
         // Dehighlight everything
         foreach (GameObject highlightedTile in highlightedTiles) {
@@ -519,6 +492,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         //Get rid of all the UI
         GameManager.GetSingleton().ClearUI();
     }
+    #endregion
 
     #region attack_functions
     public static void AttackSelection() {
@@ -552,16 +526,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         }
     }
     #endregion
-
-    //public void Respawn() {
-    //    if (LevelManager.tempUnit.GetComponent<Character>().GetPlayer() == 1) {
-    //        LevelManager.tempUnit.transform.position = new Vector3(0, gameObject.transform.position.y);
-    //    }
-    //    else if (LevelManager.tempUnit.GetComponent<Character>().GetPlayer() == 2) {
-    //        LevelManager.tempUnit.transform.position = new Vector3(LevelManager.GetGridWidth(), gameObject.transform.position.y);
-    //    }
-    //    LevelManager.tempUnit.SetActive(true);
-    //}
 
     #region movement_functions
     IEnumerator MoveUnitToThisTile(GameObject unit, GameObject originalTile) {

@@ -8,7 +8,6 @@ public class TestClass : Character
     private int[] Stats = { 5, 5, 2, 4 };
 
 
-    // Start is called before the first frame update
     void Awake() {
         totalHealth = 35;
         currentHealth = totalHealth;

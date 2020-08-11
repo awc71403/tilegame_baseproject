@@ -76,7 +76,6 @@ public abstract class Character : MonoBehaviour {
         //Create Damage Text
         print("damage text created");
         damageText = Instantiate(DamageTextPrefab);
-        //damageText.transform.SetParent(GameObject.Find("Canvas").transform, false);
         Vector3 textPositionOffset = new Vector3(0, 1.25f, 0);
         damageText.transform.position = Camera.main.WorldToScreenPoint(transform.position + textPositionOffset);
         //damageText.GetComponent<DamageTextBehavior>().SetDamage(damage);
@@ -86,7 +85,6 @@ public abstract class Character : MonoBehaviour {
         System.Random r = new System.Random();
         for (int i = 0; i < 5; i++) {
             double horizontalOffset = r.NextDouble() * 0.2 - 0.1f;
-            //double verticalOffset = r.NextDouble() * 0.2 - 0.1f;
             Vector3 vectorOffset = new Vector3((float)horizontalOffset, 0, 0);
             transform.position += vectorOffset;
             yield return new WaitForSeconds(0.025f);
@@ -194,7 +192,6 @@ public abstract class Character : MonoBehaviour {
         }
     }
 
-
     public int GetKnowledge() {
         return curStatArr[2];
     }
@@ -205,11 +202,6 @@ public abstract class Character : MonoBehaviour {
 
     public string GetName() {
         return cName;
-    }
-
-    // Update is called once per frame
-    void Update() {
-
     }
 
     public void SetPlayer(int playerNumber) {
@@ -244,13 +236,11 @@ public abstract class Character : MonoBehaviour {
         float squish = totalSquish;
         for (int i = frames; i > 0; i--) {
             transform.localScale = new Vector3(1 + stretch, 1 - squish, 1);
-            //transform.position = originalPosition - new Vector3(0, squish / 2.66667f, 0);
             yield return new WaitForSeconds(0.01f);
             stretch /= 2.5f;
             squish /= 2.5f;
         }
         transform.localScale = new Vector3(1, 1, 1);
-        //transform.position = originalPosition;
 
         // Play random step sound
         System.Random r = new System.Random();

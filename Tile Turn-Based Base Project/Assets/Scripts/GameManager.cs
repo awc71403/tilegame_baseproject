@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     List<GameObject> player2Units;
 
     GameObject[,] mapArray;
-    float tileSize;
+        float tileSize;
     #endregion
 
     #region Initialization
@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
 
         player1Units = new List<GameObject>();
         player2Units = new List<GameObject>();
+
+        m_attackButton.onClick.AddListener(PressAttackButton);
 
         tileSize = tilePrefabs[0].GetComponent<SpriteRenderer>().sprite.bounds.size.x;
         CreateTiles();
@@ -138,16 +140,17 @@ public class GameManager : MonoBehaviour
     }
 
     public void PressEndTurnButton() {
-
+        //For every character in Player 1, set can move and can attack.
         foreach (GameObject unit in player1Units) {
             unit.GetComponent<Character>().SetCanMove(true);
             unit.GetComponent<Character>().SetCanAttack(true);
         }
+        //For every character in Player 2/Enemy, set can move and can attack.
         foreach (GameObject unit in player2Units) {
             unit.GetComponent<Character>().SetCanMove(true);
             unit.GetComponent<Character>().SetCanAttack(true);
         }
-
+        //Reset selection state.
         if (TileBehavior.GetSelectionState() != null) {
             TileBehavior.selectedTile.GetComponent<TileBehavior>().SelectionStateToNull();
         }
