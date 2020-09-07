@@ -5,14 +5,14 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
-    #region selection_variables
+    #region Selection Variables
     static List<GameObject> highlightedTiles = new List<GameObject>();
     public static GameObject selectedUnit;
     public static GameObject selectedTile;
     static string selectionState;
     #endregion
 
-    #region UI_variables    
+    #region UI Variables    
     public static float tileDim;
     public static Button attackButton;
     public static Button abilityButton;
@@ -20,7 +20,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     public static GameObject diceAttack;
     #endregion
 
-    #region instance_variables
+    #region Instance Variables
     bool highlighted;
     GameObject myUnit;
     public int movementCost = 1;
@@ -37,7 +37,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     float stepDuration = 0.1f;
     #endregion
 
-    #region initialization
+    #region Initialization
     void Awake() {
         tileHighlighter.transform.position = transform.position;
         tileHighlighterAnimator = tileHighlighter.GetComponent<Animator>();
@@ -45,13 +45,15 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
+    #region Opacity
     private void setHighlightOpacity(float opacity) {
         Color c = tileHighlighter.GetComponent<Renderer>().material.color;
         c.a = opacity;
         tileHighlighter.GetComponent<Renderer>().material.color = c;
     }
+    #endregion
 
-    #region unit_functions
+    #region Unit Functions
     public void PlaceUnit(GameObject unit) {
         unit.GetComponent<Character>().SetAnimVar();
         myUnit = unit;
@@ -73,7 +75,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region variable_functions
+    #region Variable Functions
     public static string GetSelectionState() {
         return selectionState;
     }
@@ -95,7 +97,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region highlight_functions
+    #region Highlight Functions
     public void HighlightCanMove(bool enemySelect = false) {
         tileHighlighterAnimator.SetBool("canAttack", false);
         tileHighlighterAnimator.SetBool("canMove", true);
@@ -180,7 +182,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region highlight_valid_tiles_functions
+    #region Highlight Valid Tiles Functions
     void HighlightMoveableTiles(int moveEnergy, bool enemySelect = false) {
         // Don't do anything if you've run out of energy.
         if (moveEnergy < 0 || tileType == "wall") {
@@ -260,7 +262,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region selection_functions
+    #region Selection Functions
     public void OnPointerClick(PointerEventData data) {
         //Condition where pointer click fails
         if (GameManager.actionInProcess) {
@@ -384,7 +386,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region selection_state_to_functions
+    #region Selection State To Functions
     public void SelectionStateToNull() {
         // Deselect everything else
         Deselect();
@@ -471,7 +473,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region deselect
+    #region Deselect
     public static void Deselect() {
         // Dehighlight everything
         foreach (GameObject highlightedTile in highlightedTiles) {
@@ -494,7 +496,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region attack_functions
+    #region Attack Functions
     public static void AttackSelection() {
         // If selection state is move...
         if (selectionState.Equals("move")) {
@@ -527,7 +529,7 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
     }
     #endregion
 
-    #region movement_functions
+    #region Movement Functions
     IEnumerator MoveUnitToThisTile(GameObject unit, GameObject originalTile) {
         // Action in process!
         GameManager.actionInProcess = true;
@@ -540,7 +542,6 @@ public abstract class TileBehavior : MonoBehaviour, IPointerClickHandler {
         // Calculate the steps you need to take
         int unitPlayer = unit.GetComponent<Character>().player;
         List<string> movementSteps = CalculateMovement(new List<string>(), originalTile, gameObject, unit.GetComponent<Character>().GetSpeed(), unitPlayer);
-        Debug.Log(movementSteps);
 
         //Take those steps!
         foreach (string step in movementSteps) {

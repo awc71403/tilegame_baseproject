@@ -5,13 +5,17 @@ using UnityEngine.UI;
 
 public abstract class Character : MonoBehaviour {
 
-    //private string[] charArr;
     public int[] curStatArr;
     protected string cName;
-    protected string themeName;
-    public bool isDead;
     public int totalHealth;
     public int currentHealth;
+
+    public int player;
+
+    private bool canMove = true;
+    private bool canAttack = true;
+
+    public GameObject occupiedTile;
 
     // Sprite Rendering
     private SpriteRenderer myRenderer;
@@ -19,38 +23,26 @@ public abstract class Character : MonoBehaviour {
     private Shader shaderSpritesDefault;
 
     [SerializeField]
-    protected Text hPNum;
-
-    [SerializeField]
-    protected Text menuName;
-
-    [SerializeField]
     private Text DamageTextPrefab;
     public Text damageText;
-
-    public int player;
 
     [SerializeField]
     private Animator anim;
 
-    private bool canMove = true;
-    private bool canAttack = true;
+    [SerializeField]
+    private AudioClip[] stepSounds;
+    private AudioSource audioSource;
 
     public abstract void TakeDamage(int damage, int stat);
     public abstract void Ability();
     public abstract void DisplayStats();
     public abstract List<int[,]> GetAttackRange();
 
-    public GameObject occupiedTile;
-
-    [SerializeField]
-    private AudioClip[] stepSounds;
-    private AudioSource audioSource;
-
     // Movement Bounce Animation
     float totalStretch = 0.3f;
     float totalSquish = 0.3f;
 
+    #region Initialization
     void Start() {
         myRenderer = gameObject.GetComponent<SpriteRenderer>();
         shaderGUItext = Shader.Find("GUI/Text Shader");
@@ -58,83 +50,11 @@ public abstract class Character : MonoBehaviour {
         audioSource = GetComponent<AudioSource>();
         SetHPFull();
     }
+    #endregion
 
-    void WhiteSprite() {
-        myRenderer.material.shader = shaderGUItext;
-        myRenderer.color = Color.white;
-    }
-
-    void NormalSprite() {
-        myRenderer.material.shader = shaderSpritesDefault;
-        myRenderer.color = Color.white;
-    }
-
-    IEnumerator HurtAnimation(int damage) {
-        // Go white
-        WhiteSprite();
-
-        //Create Damage Text
-        print("damage text created");
-        damageText = Instantiate(DamageTextPrefab);
-        Vector3 textPositionOffset = new Vector3(0, 1.25f, 0);
-        damageText.transform.position = Camera.main.WorldToScreenPoint(transform.position + textPositionOffset);
-        //damageText.GetComponent<DamageTextBehavior>().SetDamage(damage);
-
-        // Shaking
-        Vector3 defaultPosition = transform.position;
-        System.Random r = new System.Random();
-        for (int i = 0; i < 5; i++) {
-            double horizontalOffset = r.NextDouble() * 0.2 - 0.1f;
-            Vector3 vectorOffset = new Vector3((float)horizontalOffset, 0, 0);
-            transform.position += vectorOffset;
-            yield return new WaitForSeconds(0.025f);
-            transform.position = defaultPosition;
-        }
-
-        // Go normal
-        NormalSprite();
-    }
-
-    IEnumerator DeathAnimation() {
-        // loop over 0.5 second backwards
-        print("death time");
-        for (float i = 0.25f; i >= 0; i -= Time.deltaTime) {
-            // set color with i as alpha
-            myRenderer.color = new Color(1, 1, 1, i);
-            transform.localScale = new Vector3(1.5f - i, 1.5f - i, 1);
-            yield return null;
-        }
-
-        myRenderer.color = new Color(1, 1, 1, 1);
-        transform.localScale = new Vector3(1, 1, 1);
-        gameObject.SetActive(false);
-    }
-
-    public void ResetStats() {
-        currentHealth = totalHealth;
-    }
-
-    public void SetAnimVar() {
-        if (player == 1) {
-            //anim.SetInteger("player", 1);
-        }
-        else if (player == 2) {
-            //anim.SetInteger("player", 2);
-        }
-    }
-
-    public void HPDamage(int damage) {
-        currentHealth -= damage;
-        if (currentHealth > 0) {
-            StartCoroutine("HurtAnimation", damage);
-        }
-        else {
-            StartCoroutine("DeathAnimation");
-        }
-    }
-
-    public string GetThemeName() {
-        return themeName;
+    #region Getter and Setter
+    public string GetName() {
+        return cName;
     }
 
     public int GetHP() {
@@ -192,18 +112,6 @@ public abstract class Character : MonoBehaviour {
         }
     }
 
-    public int GetKnowledge() {
-        return curStatArr[2];
-    }
-
-    public int GetWill() {
-        return curStatArr[3];
-    }
-
-    public string GetName() {
-        return cName;
-    }
-
     public void SetPlayer(int playerNumber) {
         player = playerNumber;
         //anim.SetInteger("player", playerNumber);
@@ -223,6 +131,61 @@ public abstract class Character : MonoBehaviour {
 
     public void SetOccupiedTile(GameObject tile) {
         occupiedTile = tile;
+    }
+    #endregion
+
+    #region Sprite
+    void WhiteSprite() {
+        myRenderer.material.shader = shaderGUItext;
+        myRenderer.color = Color.white;
+    }
+
+    void NormalSprite() {
+        myRenderer.material.shader = shaderSpritesDefault;
+        myRenderer.color = Color.white;
+    }
+    #endregion
+
+    #region Animation
+    IEnumerator HurtAnimation(int damage) {
+        // Go white
+        WhiteSprite();
+
+        //Create Damage Text
+        print("damage text created");
+        damageText = Instantiate(DamageTextPrefab);
+        Vector3 textPositionOffset = new Vector3(0, 1.25f, 0);
+        damageText.transform.position = Camera.main.WorldToScreenPoint(transform.position + textPositionOffset);
+        //damageText.GetComponent<DamageTextBehavior>().SetDamage(damage);
+
+        // Shaking
+        Vector3 defaultPosition = transform.position;
+        System.Random r = new System.Random();
+        for (int i = 0; i < 5; i++) {
+            double horizontalOffset = r.NextDouble() * 0.2 - 0.1f;
+            Vector3 vectorOffset = new Vector3((float)horizontalOffset, 0, 0);
+            transform.position += vectorOffset;
+            yield return new WaitForSeconds(0.025f);
+            transform.position = defaultPosition;
+        }
+
+        // Go normal
+        NormalSprite();
+    }
+
+    IEnumerator DeathAnimation() {
+        // loop over 0.5 second backwards
+        print("death time");
+        for (float i = 0.25f; i >= 0; i -= Time.deltaTime) {
+            // set color with i as alpha
+            myRenderer.color = new Color(1, 1, 1, i);
+            transform.localScale = new Vector3(1.5f - i, 1.5f - i, 1);
+            yield return null;
+        }
+
+        myRenderer.color = new Color(1, 1, 1, 1);
+        transform.localScale = new Vector3(1, 1, 1);
+        gameObject.SetActive(false);
     }
 
     public void StartBounceAnimation() {
@@ -248,4 +211,30 @@ public abstract class Character : MonoBehaviour {
         //audioSource.clip = stepSounds[stepNum];
         //audioSource.Play();
     }
+    #endregion
+
+    public void SetAnimVar() {
+        if (player == 1) {
+            //anim.SetInteger("player", 1);
+        }
+        else if (player == 2) {
+            //anim.SetInteger("player", 2);
+        }
+    }
+
+    #region Stats
+    public void ResetStats() {
+        currentHealth = totalHealth;
+    }
+
+    public void HPDamage(int damage) {
+        currentHealth -= damage;
+        if (currentHealth > 0) {
+            StartCoroutine("HurtAnimation", damage);
+        }
+        else {
+            StartCoroutine("DeathAnimation");
+        }
+    }
+    #endregion
 }
